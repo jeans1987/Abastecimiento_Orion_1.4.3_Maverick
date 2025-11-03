@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Consulta - Hospital Dr. Carlos Cisternas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+            --gradient-start: #667eea;
+            --gradient-end: #764ba2;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .container:hover {
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--warning-color), var(--success-color));
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            line-height: 1.2;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            font-weight: 300;
+        }
+        
+        .contact-info {
+            margin-top: 15px;
+            font-size: 1rem;
+            opacity: 0.8;
+            background: rgba(255,255,255,0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+        }
+        
+        .navigation {
+            display: flex;
+            background: var(--dark-color);
+            padding: 0;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
+        .navigation::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--secondary-color), transparent);
+        }
+        
+        .nav-button {
+            flex: 1;
+            min-width: 200px;
+            background: none;
+            border: none;
+            color: white;
+            padding: 25px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-bottom: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .nav-button:hover::before {
+            left: 100%;
+        }
+        
+        .nav-button:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
+        }
+        
+        .nav-button.active {
+            background: var(--secondary-color);
+            border-bottom-color: var(--warning-color);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .content-section {
+            display: none;
+            padding: 40px 30px;
+            min-height: 600px;
+            flex: 1;
+            background: #f8f9fa;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        /* Footer Mejorado */
+        footer {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            margin-top: auto;
+            position: relative;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--warning-color));
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--secondary-color), transparent);
+            margin: 25px 0;
+            opacity: 0.6;
+        }
+        
+        .footer-copyright {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 12px;
+            font-weight: 300;
+        }
+        
+        .footer-contact {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+        
+        .footer-developer {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        
+        .footer-email {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .footer-email:hover {
+            color: #fff;
+            text-decoration: underline;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+        
+        /* Controles de Filtro Mejorados */
+        .filtro-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .filtro-container:hover {
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .filtro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filtro-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filtro-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        select, button, input {
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-weight: 500;
+        }
+        
+        select {
+            background: white;
+            min-width: 200px;
+            cursor: pointer;
+        }
+        
+        input {
+            background: white;
+            min-width: 300px;
+        }
+        
+        select:focus, input:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        button {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-imprimir {
+            background: var(--success-color);
+        }
+        
+        .btn-imprimir:hover {
+            background: #229954;
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
+        }
+        
+        .btn-limpiar {
+            background: var(--warning-color);
+        }
+        
+        .btn-limpiar:hover {
+            background: #e67e22;
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.4);
+        }
+        
+        /* Gráficos y Tablas Mejorados */
+        .graficos-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .grafico-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .grafico-card:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+            transform: translateY(-5px);
+        }
+        
+        .tabla-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            overflow-x: auto;
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .tabla-card:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
+        }
+        
+        .tabla-card.evolucion-tabla {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tabla-card.evolucion-tabla .table-responsive {
+            flex: 1;
+        }
+        
+        .grafico-title, .tabla-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: left;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+        
+        .grafico-title {
+            text-align: center;
+            justify-content: center;
+        }
+        
+        .grafico-wrapper {
+            position: relative;
+            height: 400px;
+        }
+        
+        .grafico-wrapper-sm {
+            position: relative;
+            height: 350px;
+        }
+        
+        /* Layout Específico */
+        .distribucion-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .evolucion-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 15px 18px;
+            text-align: left;
+            border-bottom: 1px solid #e8e8e8;
+            transition: all 0.2s ease;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 700;
+            color: var(--primary-color);
+            position: sticky;
+            top: 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+        }
+        
+        tr:hover td {
+            background-color: #f8f9fa;
+        }
+        
+        .moneda {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .alerta-roja {
+            color: var(--danger-color);
+            font-weight: bold;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .res-td-entero {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        /* Estados y Alertas Mejorados */
+        .status-connected {
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.15) 0%, rgba(39, 174, 96, 0.05) 100%);
+            color: var(--success-color);
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-left: 5px solid var(--success-color);
+            font-weight: 500;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: none;
+            border-left: 5px solid;
+            font-weight: 500;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.15) 0%, rgba(231, 76, 60, 0.05) 100%);
+            border-left-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.15) 0%, rgba(243, 156, 18, 0.05) 100%);
+            border-left-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+        
+        .timestamp {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            font-style: italic;
+            padding: 10px;
+            background: rgba(127, 140, 141, 0.1);
+            border-radius: 8px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 50px 30px;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 1.1rem;
+            background: rgba(127, 140, 141, 0.05);
+            border-radius: 12px;
+            border: 2px dashed #bdc3c7;
+        }
+        
+        /* NUEVOS ESTILOS PARA BÚSQUEDA DE LICITACIONES */
+        .search-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .search-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+        }
+        
+        .search-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .results-container {
+            margin-top: 30px;
+        }
+        
+        .licitacion-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .licitacion-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .licitacion-subtitle {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .proveedor-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .proveedor-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .proveedor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+        
+        .proveedor-nombre {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .proveedor-datos {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .dato-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        
+        .dato-label {
+            font-weight: 600;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .dato-valor {
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: right;
+        }
+        
+        .total-card {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.3);
+        }
+        
+        .total-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .total-datos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .total-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+        
+        .total-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .total-valor {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        
+        /* NUEVOS ESTILOS PARA PANEL DE CONTROL */
+        .panel-control-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .panel-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .analista-select {
+            min-width: 250px;
+        }
+        
+        .procesos-count {
+            background: var(--secondary-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Design */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: none;
+            }
+            
+            .navigation,
+            .filtro-container,
+            .btn-imprimir,
+            .scroll-indicator,
+            footer {
+                display: none !important;
+            }
+            
+            .content-section {
+                display: block !important;
+                padding: 20px;
+            }
+            
+            .grafico-card, .tabla-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                margin-bottom: 20px;
+                page-break-inside: avoid;
+            }
+            
+            header {
+                background: #2c3e50 !important;
+                -webkit-print-color-adjust: exact;
+                color: white !important;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .graficos-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .grafico-card.full-width {
+                grid-column: 1 / -1;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: 30px;
+            }
+            
+            header {
+                padding: 50px 40px;
+            }
+            
+            h1 {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .content-section {
+                padding: 50px 40px;
+            }
+            
+            .navigation {
+                flex-wrap: nowrap;
+            }
+            
+            .nav-button {
+                padding: 25px;
+                font-size: 1.2rem;
+            }
+            
+            .grafico-title, .tabla-title {
+                font-size: 1.4rem;
+            }
+            
+            table {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .filtro-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filtro-controls {
+                justify-content: space-between;
+            }
+            
+            select, button, input {
+                flex: 1;
+                min-width: 140px;
+            }
+            
+            .grafico-wrapper {
+                height: 350px;
+            }
+            
+            .grafico-wrapper-sm {
+                height: 300px;
+            }
+            
+            th, td {
+                padding: 12px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .tabla-card {
+                padding: 20px;
+            }
+            
+            .search-header {
+                flex-direction: column;
+            }
+            
+            .search-input-group {
+                min-width: 100%;
+            }
+            
+            .proveedor-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .total-datos {
+                grid-template-columns: 1fr;
+            }
+            
+            .panel-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .panel-controls {
+                justify-content: space-between;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .filtro-controls {
+                flex-direction: column;
+            }
+            
+            select, button, input {
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+            
+            footer {
+                padding: 30px 20px;
+            }
+            
+            .footer-copyright {
+                font-size: 0.9rem;
+            }
+            
+            .footer-contact {
+                font-size: 0.85rem;
+            }
+            
+            .footer-developer {
+                font-size: 0.8rem;
+            }
+            
+            .proveedor-card {
+                padding: 20px;
+            }
+            
+            .dato-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .dato-valor {
+                text-align: left;
+            }
+            
+            .panel-controls {
+                flex-direction: column;
+            }
+            
+            .analista-select {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema de Consulta de Licitaciones y Tratos Directos</h1>
+            <p class="subtitle">Hospital Dr. Carlos Cisternas de Calama</p>
+            <p class="subtitle">Reportes Detallados del Depto de abastecimiento</p>
+            <p class="contact-info">Última actualización: <span id="lastUpdate"></span></p>
+        </header>
+        
+        <nav class="navigation">
+            <button class="nav-button active" data-section="resumen">📊 Reporte General</button>
+            <button class="nav-button" data-section="licitaciones">📋 Búsqueda por Licitación</button>
+            <button class="nav-button" data-section="tratos-directos">📑 Búsqueda por Trato Directo</button>
+            <button class="nav-button" data-section="procesos-pendientes">⚡ Panel de Control</button>
+        </nav>
+        
+        <!-- Sección Reporte General -->
+        <section id="resumen" class="content-section active">
+            <div class="filtro-container">
+                <div class="filtro-header">
+                    <div class="filtro-title">🎛️ Filtros de Reporte</div>
+                    <div class="filtro-controls">
+                        <select id="selectAnalista">
+                            <option value="">👥 Todos los Analistas</option>
+                        </select>
+                        <button onclick="cargarTodo()">🚀 Aplicar Filtro</button>
+                        <button class="btn-limpiar" onclick="limpiarFiltro()">🔄 Mostrar Todos</button>
+                        <button class="btn-imprimir" onclick="imprimirReporte()">🖨️ Imprimir Reporte</button>
+                    </div>
+                </div>
+                <div id="infoFiltro" class="timestamp">📈 Mostrando datos de todos los analistas</div>
+            </div>
+            
+            <div class="status-connected" id="statusResumen">
+                <span>✅</span>
+                <span>Sistema conectado correctamente a Google Sheets</span>
+            </div>
+            
+            <div class="loading" id="loadingResumen">
+                <div class="spinner"></div>
+                <p>Cargando reportes financieros...</p>
+            </div>
+            
+            <div class="alert alert-danger" id="errorResumen">
+                <span id="errorMessageResumen"></span>
+            </div>
+            
+            <div id="contenidoReportes">
+                <!-- Los gráficos se cargarán aquí dinámicamente -->
+            </div>
+            
+            <div id="tablasResumen" class="tablas-container">
+                <!-- Las tablas se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+        
+        <!-- Sección Búsqueda por Licitación -->
+        <section id="licitaciones" class="content-section">
+            <div class="search-container">
+                <div class="search-header">
+                    <div class="filtro-title">🔍 Búsqueda por Licitación</div>
+                    <div class="search-input-group">
+                        <input type="text" id="inputLicitacion" class="search-input" placeholder="Ingresa el ID de Licitación (ej: 2215-69-LQ23)" />
+                        <button class="search-btn" onclick="buscarLicitacion()">🔎 Buscar</button>
+                    </div>
+                </div>
+                <div class="timestamp">Ingresa el ID exacto de la licitación para ver todos sus proveedores y detalles</div>
+            </div>
+            
+            <div class="status-connected" id="statusLicitaciones">
+                <span>✅</span>
+                <span>Sistema conectado correctamente a Google Sheets</span>
+            </div>
+            
+            <div class="loading" id="loadingLicitaciones">
+                <div class="spinner"></div>
+                <p>Buscando licitación...</p>
+            </div>
+            
+            <div class="alert alert-danger" id="errorLicitaciones">
+                <span id="errorMessageLicitaciones"></span>
+            </div>
+            
+            <div class="alert alert-warning" id="noResultsLicitaciones">
+                <span>No se encontraron resultados para la búsqueda realizada</span>
+            </div>
+            
+            <div id="resultadosLicitaciones" class="results-container">
+                <!-- Los resultados se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+        
+        <!-- Sección Búsqueda por Trato Directo -->
+        <section id="tratos-directos" class="content-section">
+            <div class="search-container">
+                <div class="search-header">
+                    <div class="filtro-title">📑 Búsqueda por Trato Directo</div>
+                    <div class="search-input-group">
+                        <input type="text" id="inputTratoDirecto" class="search-input" placeholder="Ingresa el RES TD (ej: 3327)" />
+                        <button class="search-btn" onclick="buscarTratoDirecto()">🔎 Buscar</button>
+                    </div>
+                </div>
+                <div class="timestamp">Ingresa el RES TD exacto para ver todos los detalles del trato directo</div>
+            </div>
+            
+            <div class="status-connected" id="statusTratosDirectos">
+                <span>✅</span>
+                <span>Sistema conectado correctamente a Google Sheets</span>
+            </div>
+            
+            <div class="loading" id="loadingTratosDirectos">
+                <div class="spinner"></div>
+                <p>Buscando trato directo...</p>
+            </div>
+            
+            <div class="alert alert-danger" id="errorTratosDirectos">
+                <span id="errorMessageTratosDirectos"></span>
+            </div>
+            
+            <div class="alert alert-warning" id="noResultsTratosDirectos">
+                <span>No se encontraron resultados para la búsqueda realizada</span>
+            </div>
+            
+            <div id="resultadosTratosDirectos" class="results-container">
+                <!-- Los resultados se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+        
+        <!-- Sección Panel de Control -->
+        <section id="procesos-pendientes" class="content-section">
+            <div class="panel-control-container">
+                <div class="panel-header">
+                    <div class="panel-title">⚡ Panel de Control - Procesos en Gestión</div>
+                    <div class="panel-controls">
+                        <select id="selectAnalistaPanel" class="analista-select" onchange="cargarProcesosPendientes()">
+                            <option value="">👥 Todos los Analistas</option>
+                        </select>
+                        <button onclick="cargarProcesosPendientes()">🔄 Actualizar</button>
+                        <div class="procesos-count" id="contadorProcesos">0 procesos</div>
+                    </div>
+                </div>
+                <div id="infoPanel" class="timestamp">📋 Mostrando todos los procesos en gestión</div>
+            </div>
+            
+            <div class="status-connected" id="statusProcesos">
+                <span>✅</span>
+                <span>Sistema conectado correctamente a Google Sheets</span>
+            </div>
+            
+            <div class="loading" id="loadingProcesos">
+                <div class="spinner"></div>
+                <p>Cargando procesos en gestión...</p>
+            </div>
+            
+            <div class="alert alert-danger" id="errorProcesos">
+                <span id="errorMessageProcesos"></span>
+            </div>
+            
+            <div id="contenidoProcesos" class="results-container">
+                <!-- Los procesos se cargarán aquí dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <div class="footer-copyright">
+                    © 2025 Hospital Dr. Carlos Cisternas de Calama - Todos los derechos reservados
+                </div>
+                <div class="footer-divider"></div>
+                <div class="footer-contact">
+                    Para consultas técnicas contactar: 
+                    <a href="mailto:jeans.munoz.d@redsalud.gob.cl" class="footer-email">
+                        jeans.munoz.d@redsalud.gob.cl
+                    </a>
+                </div>
+                <div class="footer-developer">
+                    Desarrollado por: Maverick
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ✅ URL DEL SCRIPT ACTUALIZADA
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymSIcVk49Wy5KnbHNrVB2_Zy7epM8yFSCrNjvgEVs2ezrz9zgSVQzuH73juNryqZUCPw/exec';
+        
+        // Variables globales
+        let analistasDisponibles = [];
+        let analistasPanelControl = [];
+        let datosReporteActual = null;
+        let charts = {};
+        
+        // Datos de ejemplo para demostración
+        const datosCompletos = {
+            distribucion: [
+                { analista: "Alexandra Berna Berna", licitaciones: 4, tratos: 2 },
+                { analista: "Alexandra Castro Quispe", licitaciones: 14, tratos: 1 },
+                { analista: "Claudia Araya Perez", licitaciones: 18, tratos: 3 },
+                { analista: "Eleazar Ramirez Yañez", licitaciones: 13, tratos: 0 },
+                { analista: "Hilda Carrasco Carrasco", licitaciones: 2, tratos: 6 },
+                { analista: "Ingrid Zavala Contreras", licitaciones: 21, tratos: 1 },
+                { analista: "Marianjeles Araya Garcia", licitaciones: 3, tratos: 0 },
+                { analista: "Wilson Aracena Cortes", licitaciones: 1, tratos: 0 },
+                { analista: "Ximena Cortes Campaña", licitaciones: 17, tratos: 6 }
+            ],
+            evolucion: [
+                { año: "2022", analista: "Claudia Araya Perez", licitaciones: 1, tratos: 0 },
+                { año: "2022", analista: "Hilda Carrasco Carrasco", licitaciones: 1, tratos: 0 },
+                { año: "2023", analista: "Alexandra Berna Berna", licitaciones: 1, tratos: 0 },
+                { año: "2023", analista: "Alexandra Castro Quispe", licitaciones: 7, tratos: 0 },
+                { año: "2023", analista: "Claudia Araya Perez", licitaciones: 12, tratos: 0 },
+                { año: "2023", analista: "Eleazar Ramirez Yañez", licitaciones: 11, tratos: 0 },
+                { año: "2023", analista: "Ingrid Zavala Contreras", licitaciones: 4, tratos: 0 },
+                { año: "2023", analista: "Marianjeles Araya Garcia", licitaciones: 2, tratos: 0 },
+                { año: "2023", analista: "Wilson Aracena Cortes", licitaciones: 1, tratos: 0 },
+                { año: "2023", analista: "Ximena Cortes Campaña", licitaciones: 1, tratos: 0 },
+                { año: "2024", analista: "Alexandra Berna Berna", licitaciones: 3, tratos: 0 },
+                { año: "2024", analista: "Alexandra Castro Quispe", licitaciones: 7, tratos: 0 },
+                { año: "2024", analista: "Claudia Araya Perez", licitaciones: 3, tratos: 0 },
+                { año: "2024", analista: "Eleazar Ramirez Yañez", licitaciones: 1, tratos: 0 },
+                { año: "2024", analista: "Hilda Carrasco Carrasco", licitaciones: 1, tratos: 0 },
+                { año: "2024", analista: "Ingrid Zavala Contreras", licitaciones: 15, tratos: 0 },
+                { año: "2024", analista: "Marianjeles Araya Garcia", licitaciones: 1, tratos: 0 },
+                { año: "2024", analista: "Ximena Cortes Campaña", licitaciones: 12, tratos: 0 },
+                { año: "2025", analista: "Alexandra Berna Berna", licitaciones: 0, tratos: 2 },
+                { año: "2025", analista: "Alexandra Castro Quispe", licitaciones: 0, tratos: 1 },
+                { año: "2025", analista: "Claudia Araya Perez", licitaciones: 2, tratos: 3 },
+                { año: "2025", analista: "Eleazar Ramirez Yañez", licitaciones: 1, tratos: 0 },
+                { año: "2025", analista: "Hilda Carrasco Carrasco", licitaciones: 0, tratos: 6 },
+                { año: "2025", analista: "Ingrid Zavala Contreras", licitaciones: 2, tratos: 1 },
+                { año: "2025", analista: "Ximena Cortes Campaña", licitaciones: 4, tratos: 6 }
+            ]
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            setupNavigation();
+            cargarAnalistasDisponibles();
+            cargarAnalistasPanelControl();
+            cargarTodo();
+            actualizarFecha();
+            
+            // Configurar evento Enter en los inputs de búsqueda
+            document.getElementById('inputLicitacion').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    buscarLicitacion();
+                }
+            });
+            
+            document.getElementById('inputTratoDirecto').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    buscarTratoDirecto();
+                }
+            });
+        });
+        
+        // Configuración de navegación
+        function setupNavigation() {
+            const navButtons = document.querySelectorAll('.nav-button');
+            
+            navButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    const sectionId = this.getAttribute('data-section');
+                    document.getElementById(sectionId).classList.add('active');
+                    
+                    // Cargar datos específicos de la sección
+                    if (sectionId === 'procesos-pendientes') {
+                        cargarProcesosPendientes();
+                    }
+                });
+            });
+        }
+        
+        // Cargar analistas disponibles
+        function cargarAnalistasDisponibles() {
+            const url = `${SCRIPT_URL}?action=getAnalistasDisponibles`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        analistasDisponibles = data.analistas;
+                        llenarSelectAnalistas();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar analistas:', error);
+                    // Usar datos de ejemplo si falla
+                    analistasDisponibles = [...new Set(datosCompletos.distribucion.map(item => item.analista))].sort();
+                    llenarSelectAnalistas();
+                });
+        }
+        
+        // Cargar analistas del Panel de Control
+        function cargarAnalistasPanelControl() {
+            const url = `${SCRIPT_URL}?action=getAnalistasPanelControl`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        analistasPanelControl = data.analistas;
+                        llenarSelectAnalistasPanel();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar analistas del panel:', error);
+                    // Usar los mismos analistas generales como respaldo
+                    analistasPanelControl = analistasDisponibles;
+                    llenarSelectAnalistasPanel();
+                });
+        }
+        
+        // Llenar select con analistas
+        function llenarSelectAnalistas() {
+            const select = document.getElementById('selectAnalista');
+            select.innerHTML = '<option value="">👥 Todos los Analistas</option>';
+            
+            analistasDisponibles.forEach(analista => {
+                const option = document.createElement('option');
+                option.value = analista;
+                option.textContent = analista;
+                select.appendChild(option);
+            });
+        }
+        
+        // Llenar select con analistas del Panel de Control
+        function llenarSelectAnalistasPanel() {
+            const select = document.getElementById('selectAnalistaPanel');
+            select.innerHTML = '<option value="">👥 Todos los Analistas</option>';
+            
+            analistasPanelControl.forEach(analista => {
+                const option = document.createElement('option');
+                option.value = analista;
+                option.textContent = analista;
+                select.appendChild(option);
+            });
+        }
+        
+        // Función principal para cargar todo
+        function cargarTodo() {
+            const analistaSeleccionado = document.getElementById('selectAnalista').value;
+            mostrarLoading('resumen');
+            ocultarError('resumen');
+            
+            destruirGraficos();
+            
+            cargarGraficos(analistaSeleccionado)
+                .then(() => {
+                    return cargarTablasAlerta(analistaSeleccionado);
+                })
+                .then(() => {
+                    ocultarLoading('resumen');
+                })
+                .catch(error => {
+                    console.error('Error al cargar datos:', error);
+                    ocultarLoading('resumen');
+                    // En caso de error, usar datos de ejemplo
+                    usarDatosEjemplo(analistaSeleccionado);
+                });
+        }
+        
+        // Cargar gráficos
+        function cargarGraficos(analistaSeleccionado) {
+            return new Promise((resolve, reject) => {
+                let url = `${SCRIPT_URL}?action=getTablasResumenFinanciero`;
+                if (analistaSeleccionado) {
+                    url += `&analista=${encodeURIComponent(analistaSeleccionado)}`;
+                }
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            mostrarReportesFinancieros(data, analistaSeleccionado);
+                            crearGraficosParaTablas(analistaSeleccionado);
+                            resolve(data);
+                        } else {
+                            reject(new Error(data.error));
+                        }
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        }
+        
+        // Cargar tablas de alerta
+        function cargarTablasAlerta(analistaSeleccionado) {
+            return new Promise((resolve, reject) => {
+                let url = `${SCRIPT_URL}?action=getTablasConAlerta`;
+                if (analistaSeleccionado) {
+                    url += `&analista=${encodeURIComponent(analistaSeleccionado)}`;
+                }
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            mostrarTablasResumen(data.datos, analistaSeleccionado);
+                            actualizarInfoFiltro(analistaSeleccionado, data.datos);
+                            resolve(data);
+                        } else {
+                            reject(new Error(data.error));
+                        }
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        }
+        
+        // Mostrar reportes financieros
+        function mostrarReportesFinancieros(data, analistaSeleccionado) {
+            const contenedor = document.getElementById('contenidoReportes');
+            
+            const datosDistribucionFiltrados = analistaSeleccionado 
+                ? datosCompletos.distribucion.filter(item => item.analista === analistaSeleccionado)
+                : datosCompletos.distribucion;
+                
+            const datosEvolucionFiltrados = analistaSeleccionado 
+                ? datosCompletos.evolucion.filter(item => item.analista === analistaSeleccionado)
+                : datosCompletos.evolucion;
+            
+            let html = `
+                <div class="timestamp">
+                    📅 Última actualización: ${new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' })}
+                </div>
+                
+                <!-- SECCIÓN DISTRIBUCIÓN -->
+                <div class="distribucion-container">
+            `;
+            
+            // TABLA - Distribución por Analista (ARRIBA)
+            html += `
+                <div class="tabla-card">
+                    <div class="tabla-title">📊 Distribución por Analista - Procesos Vigentes</div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Analista</th>
+                                    <th>Licitaciones</th>
+                                    <th>Tratos Directos</th>
+                                    <th>Total General</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            let totalLicitaciones = 0;
+            let totalTratos = 0;
+            let totalGeneral = 0;
+            
+            datosDistribucionFiltrados.forEach(item => {
+                const total = item.licitaciones + item.tratos;
+                totalLicitaciones += item.licitaciones;
+                totalTratos += item.tratos;
+                totalGeneral += total;
+                
+                html += `
+                    <tr>
+                        <td>${item.analista}</td>
+                        <td>${item.licitaciones}</td>
+                        <td>${item.tratos}</td>
+                        <td><strong>${total}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                            <tfoot>
+                                <tr style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); font-weight: bold;">
+                                    <td>TOTALES</td>
+                                    <td>${totalLicitaciones}</td>
+                                    <td>${totalTratos}</td>
+                                    <td>${totalGeneral}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // GRÁFICO - Distribución por Analista (ABAJO)
+            html += `
+                <div class="grafico-card">
+                    <div class="grafico-title">📈 Distribución por Analista</div>
+                    <div class="grafico-wrapper">
+                        <canvas id="graficoBarrasDistribucion"></canvas>
+                    </div>
+                </div>
+            `;
+            
+            html += `</div>`; // Cierre distribucion-container
+            
+            // SECCIÓN EVOLUCIÓN ANUAL
+            const evolucionPorAño = {};
+            datosEvolucionFiltrados.forEach(item => {
+                if (!evolucionPorAño[item.año]) {
+                    evolucionPorAño[item.año] = { licitaciones: 0, tratos: 0 };
+                }
+                evolucionPorAño[item.año].licitaciones += item.licitaciones;
+                evolucionPorAño[item.año].tratos += item.tratos;
+            });
+            
+            const añosEvolucion = Object.keys(evolucionPorAño).sort();
+            
+            html += `
+                <div class="evolucion-container">
+                    <!-- TABLA Evolución Anual (ARRIBA) -->
+                    <div class="tabla-card evolucion-tabla">
+                        <div class="tabla-title">📅 Evolución Anual</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Año</th>
+                                        <th>Licitaciones</th>
+                                        <th>Tratos Directos</th>
+                                        <th>Total General</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
+            
+            let totalLicitacionesAnual = 0;
+            let totalTratosAnual = 0;
+            let totalGeneralAnual = 0;
+            
+            añosEvolucion.forEach(año => {
+                const licitaciones = evolucionPorAño[año].licitaciones;
+                const tratos = evolucionPorAño[año].tratos;
+                const total = licitaciones + tratos;
+                totalLicitacionesAnual += licitaciones;
+                totalTratosAnual += tratos;
+                totalGeneralAnual += total;
+                
+                html += `
+                    <tr>
+                        <td>${año}</td>
+                        <td>${licitaciones}</td>
+                        <td>${tratos}</td>
+                        <td><strong>${total}</strong></td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); font-weight: bold;">
+                                        <td>TOTALES</td>
+                                        <td>${totalLicitacionesAnual}</td>
+                                        <td>${totalTratosAnual}</td>
+                                        <td>${totalGeneralAnual}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- GRÁFICO Evolución Anual (ABAJO) -->
+                    <div class="grafico-card">
+                        <div class="grafico-title">📊 Evolución Anual de Procesos</div>
+                        <div class="grafico-wrapper">
+                            <canvas id="graficoLinealEvolucion"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // GRÁFICOS ADICIONALES CON DATOS REALES
+            html += `
+                <div class="graficos-container">
+                    <div class="grafico-card">
+                        <div class="grafico-title">💰 Distribución de Montos - Licitaciones</div>
+                        <div class="grafico-wrapper-sm">
+                            <canvas id="graficoTortaMontosLicitaciones"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="grafico-card">
+                        <div class="grafico-title">💰 Distribución de Montos - Tratos Directos</div>
+                        <div class="grafico-wrapper-sm">
+                            <canvas id="graficoTortaMontosTratos"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            contenedor.innerHTML = html;
+            
+            // Cargar gráficos de torta con datos reales
+            crearGraficosTortaConDatosReales(analistaSeleccionado);
+        }
+        
+        // Crear gráficos
+        function crearGraficosParaTablas(analistaSeleccionado) {
+            const datosDistribucionFiltrados = analistaSeleccionado 
+                ? datosCompletos.distribucion.filter(item => item.analista === analistaSeleccionado)
+                : datosCompletos.distribucion;
+                
+            const datosEvolucionFiltrados = analistaSeleccionado 
+                ? datosCompletos.evolucion.filter(item => item.analista === analistaSeleccionado)
+                : datosCompletos.evolucion;
+            
+            // Gráfico 1: Barras para Distribución
+            if (datosDistribucionFiltrados.length > 0) {
+                const ctx1 = document.getElementById('graficoBarrasDistribucion').getContext('2d');
+                const analistas = datosDistribucionFiltrados.map(item => acortarNombre(item.analista));
+                const licitaciones = datosDistribucionFiltrados.map(item => item.licitaciones);
+                const tratos = datosDistribucionFiltrados.map(item => item.tratos);
+                
+                const totalLicitaciones = licitaciones.reduce((a, b) => a + b, 0);
+                const totalTratos = tratos.reduce((a, b) => a + b, 0);
+                
+                charts.graficoBarrasDistribucion = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: analistas,
+                        datasets: [
+                            {
+                                label: `Licitaciones (${totalLicitaciones})`,
+                                data: licitaciones,
+                                backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                            },
+                            {
+                                label: `Tratos Directos (${totalTratos})`,
+                                data: tratos,
+                                backgroundColor: 'rgba(46, 204, 113, 0.8)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { 
+                                beginAtZero: true, 
+                                ticks: { precision: 0 }
+                            }
+                        },
+                        plugins: {
+                            legend: { 
+                                position: 'top',
+                                labels: { font: { size: 13 } }
+                            }
+                        }
+                    }
+                });
+                
+                aplicarEfecto3DBarras(charts.graficoBarrasDistribucion);
+            }
+            
+            // Gráfico 2: Líneas para Evolución
+            const evolucionPorAño = {};
+            datosEvolucionFiltrados.forEach(item => {
+                if (!evolucionPorAño[item.año]) {
+                    evolucionPorAño[item.año] = { licitaciones: 0, tratos: 0 };
+                }
+                evolucionPorAño[item.año].licitaciones += item.licitaciones;
+                evolucionPorAño[item.año].tratos += item.tratos;
+            });
+            
+            const añosEvolucion = Object.keys(evolucionPorAño).sort();
+            const licitacionesPorAño = añosEvolucion.map(año => evolucionPorAño[año].licitaciones);
+            const tratosPorAño = añosEvolucion.map(año => evolucionPorAño[año].tratos);
+            
+            if (añosEvolucion.length > 0) {
+                const totalLicitacionesEvolucion = licitacionesPorAño.reduce((a, b) => a + b, 0);
+                const totalTratosEvolucion = tratosPorAño.reduce((a, b) => a + b, 0);
+                
+                const ctx2 = document.getElementById('graficoLinealEvolucion').getContext('2d');
+                
+                charts.graficoLinealEvolucion = new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: añosEvolucion,
+                        datasets: [
+                            {
+                                label: `Licitaciones (${totalLicitacionesEvolucion})`,
+                                data: licitacionesPorAño,
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                                borderWidth: 4,
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: `Tratos Directos (${totalTratosEvolucion})`,
+                                data: tratosPorAño,
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                                borderWidth: 4,
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        },
+                        plugins: {
+                            legend: { position: 'top' }
+                        }
+                    }
+                });
+                
+                aplicarEfecto3DLineas(charts.graficoLinealEvolucion);
+            }
+        }
+        
+        // FUNCIÓN NUEVA: Gráficos de torta con datos reales de Google Sheets
+        function crearGraficosTortaConDatosReales(analistaSeleccionado) {
+            obtenerDatosMontosReales(analistaSeleccionado)
+                .then(datosMontos => {
+                    // Gráfico de torta para Licitaciones
+                    const ctxTorta1 = document.getElementById('graficoTortaMontosLicitaciones');
+                    if (ctxTorta1 && datosMontos.licitaciones) {
+                        if (charts.graficoTortaMontosLicitaciones) {
+                            charts.graficoTortaMontosLicitaciones.destroy();
+                        }
+                        
+                        const montoTotalLicitaciones = datosMontos.licitaciones.montoTotal || 0;
+                        const saldoLicitaciones = datosMontos.licitaciones.saldo || 0;
+                        
+                        // Si no hay datos, mostrar mensaje
+                        if (montoTotalLicitaciones === 0 && saldoLicitaciones === 0) {
+                            ctxTorta1.parentElement.innerHTML = `
+                                <div class="grafico-title">💰 Distribución de Montos - Licitaciones</div>
+                                <div class="no-data">No hay datos de montos disponibles para licitaciones</div>
+                            `;
+                            return;
+                        }
+                        
+                        charts.graficoTortaMontosLicitaciones = new Chart(ctxTorta1, {
+                            type: 'doughnut',
+                            data: {
+                                labels: [
+                                    `Monto Total ${formatearMoneda(montoTotalLicitaciones)}`,
+                                    `Saldo por Ejecutar ${formatearMoneda(saldoLicitaciones)}`
+                                ],
+                                datasets: [{
+                                    data: [montoTotalLicitaciones, saldoLicitaciones],
+                                    backgroundColor: [
+                                        'rgba(155, 89, 182, 0.8)',
+                                        'rgba(241, 196, 15, 0.8)'
+                                    ],
+                                    borderWidth: 3,
+                                    borderColor: 'white',
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { 
+                                        position: 'bottom',
+                                        labels: { font: { size: 12 } }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return `${context.label}: ${formatearMoneda(context.parsed)}`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        aplicarEfecto3DTorta(charts.graficoTortaMontosLicitaciones);
+                    }
+                    
+                    // Gráfico de torta para Tratos Directos
+                    const ctxTorta2 = document.getElementById('graficoTortaMontosTratos');
+                    if (ctxTorta2 && datosMontos.tratosDirectos) {
+                        if (charts.graficoTortaMontosTratos) {
+                            charts.graficoTortaMontosTratos.destroy();
+                        }
+                        
+                        const montoTotalTratos = datosMontos.tratosDirectos.montoTotal || 0;
+                        const saldoTratos = datosMontos.tratosDirectos.saldo || 0;
+                        
+                        // Si no hay datos, mostrar mensaje
+                        if (montoTotalTratos === 0 && saldoTratos === 0) {
+                            ctxTorta2.parentElement.innerHTML = `
+                                <div class="grafico-title">💰 Distribución de Montos - Tratos Directos</div>
+                                <div class="no-data">No hay datos de montos disponibles para tratos directos</div>
+                            `;
+                            return;
+                        }
+                        
+                        charts.graficoTortaMontosTratos = new Chart(ctxTorta2, {
+                            type: 'doughnut',
+                            data: {
+                                labels: [
+                                    `Monto Total ${formatearMoneda(montoTotalTratos)}`,
+                                    `Saldo por Ejecutar ${formatearMoneda(saldoTratos)}`
+                                ],
+                                datasets: [{
+                                    data: [montoTotalTratos, saldoTratos],
+                                    backgroundColor: [
+                                        'rgba(230, 126, 34, 0.8)',
+                                        'rgba(231, 76, 60, 0.8)'
+                                    ],
+                                    borderWidth: 3,
+                                    borderColor: 'white',
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { 
+                                        position: 'bottom',
+                                        labels: { font: { size: 12 } }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return `${context.label}: ${formatearMoneda(context.parsed)}`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        aplicarEfecto3DTorta(charts.graficoTortaMontosTratos);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar datos de montos:', error);
+                    // En caso de error, crear gráficos con datos de ejemplo
+                    crearGraficosTortaPlaceholder(analistaSeleccionado);
+                });
+        }
+        
+        // FUNCIÓN NUEVA: Obtener datos reales de montos desde Google Sheets
+        function obtenerDatosMontosReales(analistaSeleccionado) {
+            return new Promise((resolve, reject) => {
+                let url = `${SCRIPT_URL}?action=getMontosResumen`;
+                if (analistaSeleccionado) {
+                    url += `&analista=${encodeURIComponent(analistaSeleccionado)}`;
+                }
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            resolve(data.datos);
+                        } else {
+                            reject(new Error(data.error));
+                        }
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        }
+        
+        // Función de respaldo para gráficos de torta (en caso de error)
+        function crearGraficosTortaPlaceholder(analistaSeleccionado) {
+            // Valores por defecto basados en el analista seleccionado
+            let montoTotalLicitaciones = analistaSeleccionado ? 500000000 : 1250000000;
+            let saldoLicitaciones = analistaSeleccionado ? 150000000 : 450000000;
+            let montoTotalTratos = analistaSeleccionado ? 300000000 : 890000000;
+            let saldoTratos = analistaSeleccionado ? 70000000 : 210000000;
+            
+            // Gráfico de torta para Licitaciones
+            const ctxTorta1 = document.getElementById('graficoTortaMontosLicitaciones');
+            if (ctxTorta1) {
+                if (charts.graficoTortaMontosLicitaciones) {
+                    charts.graficoTortaMontosLicitaciones.destroy();
+                }
+                
+                charts.graficoTortaMontosLicitaciones = new Chart(ctxTorta1, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            `Monto Total ${formatearMoneda(montoTotalLicitaciones)}`,
+                            `Saldo por Ejecutar ${formatearMoneda(saldoLicitaciones)}`
+                        ],
+                        datasets: [{
+                            data: [montoTotalLicitaciones, saldoLicitaciones],
+                            backgroundColor: ['rgba(155, 89, 182, 0.8)', 'rgba(241, 196, 15, 0.8)'],
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'bottom',
+                                labels: { font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de torta para Tratos Directos
+            const ctxTorta2 = document.getElementById('graficoTortaMontosTratos');
+            if (ctxTorta2) {
+                if (charts.graficoTortaMontosTratos) {
+                    charts.graficoTortaMontosTratos.destroy();
+                }
+                
+                charts.graficoTortaMontosTratos = new Chart(ctxTorta2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            `Monto Total ${formatearMoneda(montoTotalTratos)}`,
+                            `Saldo por Ejecutar ${formatearMoneda(saldoTratos)}`
+                        ],
+                        datasets: [{
+                            data: [montoTotalTratos, saldoTratos],
+                            backgroundColor: ['rgba(230, 126, 34, 0.8)', 'rgba(231, 76, 60, 0.8)'],
+                            borderWidth: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'bottom',
+                                labels: { font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Función para usar datos de ejemplo en caso de error
+        function usarDatosEjemplo(analistaSeleccionado) {
+            console.log('Usando datos de ejemplo');
+            mostrarReportesFinancieros({success: true}, analistaSeleccionado);
+            crearGraficosParaTablas(analistaSeleccionado);
+            crearGraficosTortaPlaceholder(analistaSeleccionado);
+            
+            // Mostrar tablas de alerta vacías
+            mostrarTablasResumen({
+                licitacionesAlerta: [],
+                tratosAlerta: []
+            }, analistaSeleccionado);
+            
+            actualizarInfoFiltro(analistaSeleccionado, {
+                licitacionesAlerta: [],
+                tratosAlerta: []
+            });
+        }
+        
+        // Efectos 3D para gráficos
+        function aplicarEfecto3DBarras(chart) {
+            const originalDraw = chart.draw;
+            chart.draw = function() {
+                const ctx = this.ctx;
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 15;
+                ctx.shadowOffsetX = 5;
+                ctx.shadowOffsetY = 5;
+                originalDraw.call(this);
+                ctx.restore();
+            };
+            chart.update();
+        }
+        
+        function aplicarEfecto3DTorta(chart) {
+            const originalDraw = chart.draw;
+            chart.draw = function() {
+                const ctx = this.ctx;
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetX = 8;
+                ctx.shadowOffsetY = 8;
+                originalDraw.call(this);
+                ctx.restore();
+            };
+            chart.update();
+        }
+        
+        function aplicarEfecto3DLineas(chart) {
+            const originalDraw = chart.draw;
+            chart.draw = function() {
+                const ctx = this.ctx;
+                ctx.save();
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetX = 4;
+                ctx.shadowOffsetY = 4;
+                originalDraw.call(this);
+                ctx.restore();
+            };
+            chart.update();
+        }
+        
+        // FUNCIÓN NUEVA: Búsqueda de licitación por ID
+        function buscarLicitacion() {
+            const idLicitacion = document.getElementById('inputLicitacion').value.trim();
+            
+            if (!idLicitacion) {
+                mostrarError('licitaciones', 'Por favor ingresa un ID de licitación');
+                return;
+            }
+            
+            // Limpiar resultados anteriores
+            document.getElementById('resultadosLicitaciones').innerHTML = '';
+            ocultarError('licitaciones');
+            ocultarNoResults('licitaciones');
+            mostrarLoading('licitaciones');
+            
+            // Realizar búsqueda
+            const url = `${SCRIPT_URL}?action=getLicitacion&id=${encodeURIComponent(idLicitacion)}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    ocultarLoading('licitaciones');
+                    
+                    if (data.success && data.data && data.data.length > 0) {
+                        mostrarResultadosLicitacion(data.data, idLicitacion);
+                    } else {
+                        mostrarNoResults('licitaciones');
+                    }
+                })
+                .catch(error => {
+                    ocultarLoading('licitaciones');
+                    mostrarError('licitaciones', 'Error al buscar la licitación: ' + error.message);
+                    console.error('Error en búsqueda:', error);
+                });
+        }
+        
+        // FUNCIÓN NUEVA: Mostrar resultados de búsqueda de licitación
+        function mostrarResultadosLicitacion(resultados, idBuscado) {
+            const contenedor = document.getElementById('resultadosLicitaciones');
+            
+            // Agrupar por ID de licitación (por si hay múltiples con el mismo ID)
+            const agrupados = {};
+            resultados.forEach(item => {
+                if (!agrupados[item.idLicitacion]) {
+                    agrupados[item.idLicitacion] = [];
+                }
+                agrupados[item.idLicitacion].push(item);
+            });
+            
+            let html = '';
+            
+            // Para cada grupo de licitación
+            Object.keys(agrupados).forEach(idLicitacion => {
+                const items = agrupados[idLicitacion];
+                const primerItem = items[0];
+                
+                // Calcular totales
+                const totalMonto = items.reduce((sum, item) => sum + (item.montoAdjudicado || 0), 0);
+                const totalSaldo = items.reduce((sum, item) => sum + (item.saldoAdjudicado || 0), 0);
+                
+                // Header de la licitación
+                html += `
+                    <div class="licitacion-header">
+                        <div class="licitacion-title">${primerItem.nombreLicitacion || 'Licitación sin nombre'}</div>
+                        <div class="licitacion-subtitle">ID: ${idLicitacion} | Año: ${primerItem.año || 'No especificado'} | ${items.length} proveedor(es)</div>
+                    </div>
+                    
+                    <div class="proveedor-cards">
+                `;
+                
+                // Tarjetas de proveedores
+                items.forEach((item, index) => {
+                    const alertaClass = typeof item.alertaContrato === 'string' && item.alertaContrato.includes('CADUCADA') ? 'alerta-roja' : '';
+                    const alertaText = typeof item.alertaContrato === 'string' && item.alertaContrato.includes('CADUCADA') 
+                        ? 'CADUCADA' 
+                        : (item.alertaContrato || 'N/A');
+                    
+                    html += `
+                        <div class="proveedor-card">
+                            <div class="proveedor-nombre">${item.proveedor || 'Proveedor no especificado'}</div>
+                            <div class="proveedor-datos">
+                                <div class="dato-item">
+                                    <span class="dato-label">📅 Año</span>
+                                    <span class="dato-valor">${item.año || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">📋 Término Contrato</span>
+                                    <span class="dato-valor">${item.terminoContrato || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">⚠️ Alerta Contrato</span>
+                                    <span class="dato-valor ${alertaClass}">${alertaText}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">💰 Monto Adjudicado</span>
+                                    <span class="dato-valor">${formatearMoneda(item.montoAdjudicado)}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">💵 Saldo Adjudicado</span>
+                                    <span class="dato-valor">${formatearMoneda(item.saldoAdjudicado)}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">👤 Analista</span>
+                                    <span class="dato-valor">${item.nombreAnalista || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">📝 Observación</span>
+                                    <span class="dato-valor">${item.observacion || 'Sin observaciones'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`; // Cierre proveedor-cards
+                
+                // Card de totales
+                html += `
+                    <div class="total-card">
+                        <div class="total-title">📊 Totales de la Licitación</div>
+                        <div class="total-datos">
+                            <div class="total-item">
+                                <div class="total-label">Total Proveedores</div>
+                                <div class="total-valor">${items.length}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Monto Total</div>
+                                <div class="total-valor">${formatearMoneda(totalMonto)}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Saldo Total</div>
+                                <div class="total-valor">${formatearMoneda(totalSaldo)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contenedor.innerHTML = html;
+        }
+        
+        // FUNCIÓN NUEVA: Búsqueda de trato directo por RES TD
+        function buscarTratoDirecto() {
+            const resTD = document.getElementById('inputTratoDirecto').value.trim();
+            
+            if (!resTD) {
+                mostrarError('tratosDirectos', 'Por favor ingresa un RES TD');
+                return;
+            }
+            
+            // Limpiar resultados anteriores
+            document.getElementById('resultadosTratosDirectos').innerHTML = '';
+            ocultarError('tratosDirectos');
+            ocultarNoResults('tratosDirectos');
+            mostrarLoading('tratosDirectos');
+            
+            // Realizar búsqueda
+            const url = `${SCRIPT_URL}?action=getTratoDirecto&id=${encodeURIComponent(resTD)}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    ocultarLoading('tratosDirectos');
+                    
+                    if (data.success && data.data && data.data.length > 0) {
+                        mostrarResultadosTratoDirecto(data.data, resTD);
+                    } else {
+                        mostrarNoResults('tratosDirectos');
+                    }
+                })
+                .catch(error => {
+                    ocultarLoading('tratosDirectos');
+                    mostrarError('tratosDirectos', 'Error al buscar el trato directo: ' + error.message);
+                    console.error('Error en búsqueda:', error);
+                });
+        }
+        
+        // FUNCIÓN NUEVA: Mostrar resultados de búsqueda de trato directo
+        function mostrarResultadosTratoDirecto(resultados, resTDBuscado) {
+            const contenedor = document.getElementById('resultadosTratosDirectos');
+            
+            // Agrupar por RES TD (por si hay múltiples con el mismo RES TD)
+            const agrupados = {};
+            resultados.forEach(item => {
+                const key = item.resTD || item.td || 'SIN_ID';
+                if (!agrupados[key]) {
+                    agrupados[key] = [];
+                }
+                agrupados[key].push(item);
+            });
+            
+            let html = '';
+            
+            // Para cada grupo de trato directo
+            Object.keys(agrupados).forEach(resTD => {
+                const items = agrupados[resTD];
+                const primerItem = items[0];
+                
+                // Calcular totales
+                const totalMonto = items.reduce((sum, item) => sum + (item.montoAdjudicado || item.montoTD || 0), 0);
+                const totalSaldo = items.reduce((sum, item) => sum + (item.saldo || item.saldoAdjudicado || 0), 0);
+                
+                // Header del trato directo
+                html += `
+                    <div class="licitacion-header">
+                        <div class="licitacion-title">${primerItem.nombreOC || 'Trato Directo sin nombre'}</div>
+                        <div class="licitacion-subtitle">RES TD: ${resTD} | Año: ${primerItem.año || 'No especificado'} | ${items.length} registro(s)</div>
+                    </div>
+                    
+                    <div class="proveedor-cards">
+                `;
+                
+                // Tarjetas de resultados
+                items.forEach((item, index) => {
+                    const alertaClass = typeof item.alertaContrato === 'string' && item.alertaContrato.includes('CADUCADA') ? 'alerta-roja' : '';
+                    const alertaText = typeof item.alertaContrato === 'string' && item.alertaContrato.includes('CADUCADA') 
+                        ? 'CADUCADA' 
+                        : (item.alertaContrato || 'N/A');
+                    
+                    html += `
+                        <div class="proveedor-card">
+                            <div class="proveedor-nombre">${item.proveedor || 'Proveedor no especificado'}</div>
+                            <div class="proveedor-datos">
+                                <div class="dato-item">
+                                    <span class="dato-label">📅 Año</span>
+                                    <span class="dato-valor">${item.año || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">🔢 TD</span>
+                                    <span class="dato-valor">${item.td || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">📋 Número OC</span>
+                                    <span class="dato-valor">${item.numeroOC || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">📝 Nombre OC</span>
+                                    <span class="dato-valor">${item.nombreOC || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">📅 Término Contrato</span>
+                                    <span class="dato-valor">${item.terminoContrato || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">⚠️ Alerta Contrato</span>
+                                    <span class="dato-valor ${alertaClass}">${alertaText}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">💰 Monto TD</span>
+                                    <span class="dato-valor">${formatearMoneda(item.montoAdjudicado || item.montoTD)}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">💵 Saldo Adjudicado</span>
+                                    <span class="dato-valor">${formatearMoneda(item.saldo || item.saldoAdjudicado)}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">👤 Analista</span>
+                                    <span class="dato-valor">${item.nombreAnalista || 'N/A'}</span>
+                                </div>
+                                <div class="dato-item">
+                                    <span class="dato-label">📝 Observación</span>
+                                    <span class="dato-valor">${item.observacion || 'Sin observaciones'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`; // Cierre proveedor-cards
+                
+                // Card de totales
+                html += `
+                    <div class="total-card">
+                        <div class="total-title">📊 Totales del Trato Directo</div>
+                        <div class="total-datos">
+                            <div class="total-item">
+                                <div class="total-label">Total Registros</div>
+                                <div class="total-valor">${items.length}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Monto Total</div>
+                                <div class="total-valor">${formatearMoneda(totalMonto)}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Saldo Total</div>
+                                <div class="total-valor">${formatearMoneda(totalSaldo)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contenedor.innerHTML = html;
+        }
+        
+        // FUNCIÓN NUEVA: Cargar procesos pendientes
+        function cargarProcesosPendientes() {
+            const analistaSeleccionado = document.getElementById('selectAnalistaPanel').value;
+            mostrarLoading('procesos');
+            ocultarError('procesos');
+            
+            let url = `${SCRIPT_URL}?action=getProcesosPendientes`;
+            if (analistaSeleccionado) {
+                url += `&analista=${encodeURIComponent(analistaSeleccionado)}`;
+            }
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    ocultarLoading('procesos');
+                    
+                    if (data.success && data.data && data.data.length > 0) {
+                        mostrarProcesosPendientes(data.data, analistaSeleccionado);
+                        actualizarContadorProcesos(data.data.length);
+                        actualizarInfoPanel(analistaSeleccionado, data.data.length);
+                    } else {
+                        document.getElementById('contenidoProcesos').innerHTML = `
+                            <div class="no-data">
+                                ${analistaSeleccionado ? 
+                                    `No hay procesos en gestión para el analista: ${analistaSeleccionado}` : 
+                                    'No hay procesos en gestión registrados en este momento'}
+                            </div>
+                        `;
+                        actualizarContadorProcesos(0);
+                        actualizarInfoPanel(analistaSeleccionado, 0);
+                    }
+                })
+                .catch(error => {
+                    ocultarLoading('procesos');
+                    mostrarError('procesos', 'Error al cargar procesos: ' + error.message);
+                    actualizarContadorProcesos(0);
+                });
+        }
+        
+        // FUNCIÓN NUEVA: Mostrar procesos pendientes
+        function mostrarProcesosPendientes(procesos, analistaSeleccionado) {
+            const contenedor = document.getElementById('contenidoProcesos');
+            
+            let html = `
+                <div class="tabla-card">
+                    <div class="tabla-title">⚡ Procesos en Gestión ${analistaSeleccionado ? `- ${analistaSeleccionado}` : ''}</div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Analista</th>
+                                    <th>Proceso en Gestión</th>
+                                    <th>Observación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            procesos.forEach(proceso => {
+                html += `
+                    <tr>
+                        <td><strong>${proceso.analista || 'N/A'}</strong></td>
+                        <td>${proceso.procesoGestion || 'N/A'}</td>
+                        <td>${proceso.observacion || 'Sin observaciones'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="timestamp">Total de procesos en gestión: ${procesos.length}</div>
+                </div>
+            `;
+            
+            contenedor.innerHTML = html;
+        }
+        
+        // FUNCIÓN NUEVA: Actualizar contador de procesos
+        function actualizarContadorProcesos(cantidad) {
+            const contador = document.getElementById('contadorProcesos');
+            contador.textContent = `${cantidad} proceso${cantidad !== 1 ? 's' : ''}`;
+        }
+        
+        // FUNCIÓN NUEVA: Actualizar información del panel
+        function actualizarInfoPanel(analistaSeleccionado, cantidad) {
+            const infoPanel = document.getElementById('infoPanel');
+            if (analistaSeleccionado) {
+                infoPanel.textContent = `📋 Mostrando procesos del analista: ${analistaSeleccionado} - ${cantidad} proceso${cantidad !== 1 ? 's' : ''} encontrado${cantidad !== 1 ? 's' : ''}`;
+            } else {
+                infoPanel.textContent = `📋 Mostrando todos los procesos en gestión - ${cantidad} proceso${cantidad !== 1 ? 's' : ''} encontrado${cantidad !== 1 ? 's' : ''}`;
+            }
+        }
+        
+        // Resto de funciones existentes...
+        function mostrarTablasResumen(datos, analistaSeleccionado) {
+            const contenedor = document.getElementById('tablasResumen');
+            let html = '';
+            
+            if (datos.licitacionesAlerta && datos.licitacionesAlerta.length > 0) {
+                html += `
+                    <div class="tabla-card">
+                        <div class="tabla-title">⚠️ Licitaciones - Alerta Contrato < 121 días</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Año</th>
+                                        <th>ID Licitación</th>
+                                        <th>Nombre Licitación</th>
+                                        <th>Proveedor</th>
+                                        <th>Alerta</th>
+                                        <th>Saldo</th>
+                                        <th>Término</th>
+                                        <th>Analista</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                datos.licitacionesAlerta.forEach(item => {
+                    html += `
+                        <tr>
+                            <td>${item.año || ''}</td>
+                            <td>${item.idLicitacion || ''}</td>
+                            <td>${item.nombreLicitacion || ''}</td>
+                            <td>${item.proveedor || ''}</td>
+                            <td class="alerta-roja">${item.alertaContrato || ''} días</td>
+                            <td class="moneda">${formatearMoneda(item.saldoAdjudicado) || ''}</td>
+                            <td>${item.terminoContrato || ''}</td>
+                            <td>${item.nombreAnalista || ''}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="timestamp">Total de licitaciones con alerta: ${datos.licitacionesAlerta.length}</div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="tabla-card">
+                        <div class="tabla-title">⚠️ Licitaciones - Alerta Contrato < 121 días</div>
+                        <div class="no-data">No hay licitaciones con alerta de contrato menor a 121 días</div>
+                    </div>
+                `;
+            }
+            
+            if (datos.tratosAlerta && datos.tratosAlerta.length > 0) {
+                html += `
+                    <div class="tabla-card">
+                        <div class="tabla-title">⚠️ Tratos Directos - Alerta Contrato < 121 días</div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Año</th>
+                                        <th>TD</th>
+                                        <th>Res TD</th>
+                                        <th>Número OC</th>
+                                        <th>Proveedor</th>
+                                        <th>Término Contrato</th>
+                                        <th>Alerta Contrato</th>
+                                        <th>Monto TD</th>
+                                        <th>Saldo Adjudicado</th>
+                                        <th>Analista</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+                
+                datos.tratosAlerta.forEach(item => {
+                    const resTDEntero = item.resTD ? parseInt(item.resTD) : '';
+                    
+                    html += `
+                        <tr>
+                            <td>${item.año || ''}</td>
+                            <td>${item.td || ''}</td>
+                            <td class="res-td-entero">${resTDEntero}</td>
+                            <td>${item.numeroOC || ''}</td>
+                            <td>${item.proveedor || ''}</td>
+                            <td>${item.terminoContrato || ''}</td>
+                            <td class="alerta-roja">${item.alertaContrato || ''} días</td>
+                            <td class="moneda">${formatearMoneda(item.montoTD) || ''}</td>
+                            <td class="moneda">${formatearMoneda(item.saldoAdjudicado) || ''}</td>
+                            <td>${item.nombreAnalista || ''}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="timestamp">Total de tratos directos con alerta: ${datos.tratosAlerta.length}</div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="tabla-card">
+                        <div class="tabla-title">⚠️ Tratos Directos - Alerta Contrato < 121 días</div>
+                        <div class="no-data">No hay tratos directos con alerta de contrato menor a 121 días</div>
+                    </div>
+                `;
+            }
+            
+            contenedor.innerHTML = html;
+        }
+        
+        function destruirGraficos() {
+            Object.keys(charts).forEach(key => {
+                if (charts[key]) {
+                    charts[key].destroy();
+                }
+            });
+            charts = {};
+        }
+        
+        function actualizarInfoFiltro(analistaSeleccionado, datos) {
+            const infoFiltro = document.getElementById('infoFiltro');
+            const totalLicitaciones = datos.licitacionesAlerta ? datos.licitacionesAlerta.length : 0;
+            const totalTratos = datos.tratosAlerta ? datos.tratosAlerta.length : 0;
+            const totalProcesos = totalLicitaciones + totalTratos;
+            
+            if (analistaSeleccionado) {
+                infoFiltro.textContent = `Mostrando datos del analista: ${analistaSeleccionado} - ${totalProcesos} procesos con alerta encontrados (${totalLicitaciones} licitaciones, ${totalTratos} tratos directos)`;
+            } else {
+                infoFiltro.textContent = `Mostrando datos de todos los analistas - ${totalProcesos} procesos con alerta encontrados (${totalLicitaciones} licitaciones, ${totalTratos} tratos directos)`;
+            }
+        }
+        
+        function limpiarFiltro() {
+            document.getElementById('selectAnalista').value = '';
+            cargarTodo();
+        }
+        
+        function imprimirReporte() {
+            window.print();
+        }
+        
+        function formatearMoneda(valor) {
+            if (!valor && valor !== 0) return '$0';
+            
+            const numero = typeof valor === 'string' ? parseFloat(valor.replace(/[^0-9.-]+/g, "")) : valor;
+            
+            if (isNaN(numero)) return '$0';
+            
+            return '$' + numero.toLocaleString('es-CL', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+        
+        function acortarNombre(nombre) {
+            if (!nombre) return '';
+            if (nombre.length <= 15) return nombre;
+            
+            const partes = nombre.split(' ');
+            if (partes.length > 1) {
+                return partes[0] + ' ' + partes[1].charAt(0) + '.';
+            }
+            
+            return nombre.substring(0, 12) + '...';
+        }
+        
+        function mostrarLoading(section) {
+            document.getElementById(`loading${capitalizeFirstLetter(section)}`).style.display = 'block';
+        }
+        
+        function ocultarLoading(section) {
+            document.getElementById(`loading${capitalizeFirstLetter(section)}`).style.display = 'none';
+        }
+        
+        function mostrarError(section, mensaje) {
+            const errorElement = document.getElementById(`error${capitalizeFirstLetter(section)}`);
+            const messageElement = document.getElementById(`errorMessage${capitalizeFirstLetter(section)}`);
+            messageElement.textContent = mensaje;
+            errorElement.style.display = 'block';
+        }
+        
+        function ocultarError(section) {
+            document.getElementById(`error${capitalizeFirstLetter(section)}`).style.display = 'none';
+        }
+        
+        function mostrarNoResults(section) {
+            document.getElementById(`noResults${capitalizeFirstLetter(section)}`).style.display = 'block';
+        }
+        
+        function ocultarNoResults(section) {
+            document.getElementById(`noResults${capitalizeFirstLetter(section)}`).style.display = 'none';
+        }
+        
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        
+        function actualizarFecha() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('lastUpdate').textContent = now.toLocaleDateString('es-CL', options);
+        }
+    </script>
+</body>
+</html>
